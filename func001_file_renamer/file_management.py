@@ -1,4 +1,8 @@
-"""Tools to manage copying and file renaming for func001 files from the Linington Lab for use with MS2Analyte"""
+"""Tools to manage copying and file renaming for func001 files from the Linington Lab for use with MS2Analyte
+
+Designed for use with legacy Waters input files in the general format YYYYMMDD_RLxx9999x.raw
+
+"""
 
 import glob
 import os
