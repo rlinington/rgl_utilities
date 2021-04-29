@@ -10,16 +10,14 @@ import sys
 import csv
 from shutil import copy
 from collections import defaultdict
+from os.path import expanduser
 
 
 def replace_sample_name(filepath):
 
     filename = str(os.path.basename(filepath).rsplit(".")[0])
-    print(filename)
     new_filename = filename.replace('_func001', '')
     new_filename = new_filename.replace('-', '_R')
-    print(new_filename)
-
 
     return new_filename
 
@@ -40,22 +38,22 @@ def create_sw_dict(sw_csv_file):
 
 if __name__ == "__main__":
 
-    source_data_directory = os.path.join("rgl_utilities", "data", "func001_file_renamer", "test_data")
-    destination_directory = os.path.join("rgl_utilities", "data", "func001_file_renamer", "test_data", "output")
-    sw_naming_file = os.path.join("rgl_utilities", "data", "func001_file_renamer", "sw_converter_list.csv")
+    source_data_directory = os.path.expanduser(os.path.join("~", "Documents", "Collaborators", "Eustaquio", "BKD_MS2Analyte", "PKS_NRPS_BGCs", "Blanks"))
+    destination_directory = os.path.expanduser(os.path.join("~", "Documents", "Collaborators", "Eustaquio", "BKD_MS2Analyte", "PKS_NRPS_BGCs", "Renamed_Blanks"))
+    # sw_naming_file = os.path.join("rgl_utilities", "data", "func001_file_renamer", "sw_converter_list.csv")
 
-    sw_renaming_dict = create_sw_dict(sw_naming_file)
+    # sw_renaming_dict = create_sw_dict(sw_naming_file)
 
     for funcfile in glob.glob(os.path.join(source_data_directory, "*_func001.csv")):
+        print(funcfile)
 
         revised_sample_name = replace_sample_name(funcfile)
 
-        if revised_sample_name[:2] == "SW":
-            sample_id = revised_sample_name.split("_")[0]
-            print(sample_id)
-            replicate_id = revised_sample_name.split("_")[1]
-
-            new_sample_name = sw_renaming_dict[sample_id]
-            revised_sample_name = new_sample_name + "_" + replicate_id
+        # if revised_sample_name[:2] == "SW":
+        #     sample_id = revised_sample_name.split("_")[0]
+        #     replicate_id = revised_sample_name.split("_")[1]
+        #
+        #     new_sample_name = sw_renaming_dict[sample_id]
+        #     revised_sample_name = new_sample_name + "_" + replicate_id
 
         copy(funcfile, os.path.join(destination_directory, revised_sample_name + ".csv"))
