@@ -39,7 +39,7 @@ def filter_by_activity(graph, min_activity_score, min_cluster_score):
                                               "data",
                                               "network_management",
                                               "np_analyst",
-                                              "example_filtered_graph.graphml")), "wb") as g:
+                                              "network_2_03_filtered.graphml")), "wb") as g:
         nx.write_graphml(graph, g)
 
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
                                               "data",
                                               "network_management",
                                               "np_analyst",
-                                              "example_full_graph.graphml"))) as f:
+                                              "network_2_03_communities.graphml"))) as f:
         input_graph = nx.read_graphml(f)
 
-    filter_by_activity(input_graph, 0.3, 0.01)
+    filter_by_activity(input_graph, 2, 0.3)

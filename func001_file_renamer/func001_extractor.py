@@ -42,7 +42,6 @@ def extract_func001(source, destination):
 
 
 if __name__ == "__main__":
+
     source, destination = define_paths()
-    # source = os.path.normpath("/Users/roger/Git/rgl_utilities/data/func001_file_renamer/func001_extractor_test_data/source_dir")
-    # destination = os.path.normpath("/Users/roger/Git/rgl_utilities/data/func001_file_renamer/func001_extractor_test_data/destination_dir")
     extract_func001(source, destination)
