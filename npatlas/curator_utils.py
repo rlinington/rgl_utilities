@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import requests
 import time
-import ast
+import json
 
 
 def submission_to_curator(submission_dir):
@@ -61,7 +61,31 @@ def submission_to_curator(submission_dir):
         json.dump(insertion_data, g)
 
 
+def find_bad_character(name_string):
+    """Evaluate string for non-utf-8 characters"""
+    cleaned = ''.join(c for c in name_string if c.isprintable())
+    if len(name_string) != len(cleaned):
+        print(name_string)
+        print(cleaned)
+
+
 if __name__ == "__main__":
 
-    depositions_dir = Path("/Users/roger/Documents/Chemistry/NP_Atlas/Depositions")
-    submission_to_curator(depositions_dir)
+    # Create depositions from jsons
+    # depositions_dir = Path("/Users/roger/Documents/Chemistry/NP_Atlas/Depositions")
+    # submission_to_curator(depositions_dir)
+
+    # Find bad names strings
+
+    with open("/Users/roger/Git/rgl_utilities/data/NP_Atlas/response_1666116851678.json", "rb") as f:
+        name_list = json.load(f)
+    for name_string in name_list:
+        find_bad_character(name_string)
+
+    # test_strings = ["(18R)-18-O--d-glucopyranosyl-(1-3)-B[-d-glucopyranosyl-(1-2)]-B-d-glucopyranoside of allo-murolic acid",
+    #                 "(18R)-18-O-B-d-glucopyranosyl-(1-2)-B-d-glucopyranoside of allo-murolic acid",
+    #                 "(18R)-O-B\f-d-glucopyranosyl-(1-3)-B\f-d-glucopyranoside of murolic acid",
+    #                 "����",
+    #                 "🿾🿿𯿾𯿿𿿾𿿿񏿾񏿿񟿾񟿿񯿾񯿿񿿾񿿿򏿾򏿿"]
+    # for test_string in test_strings:
+    #     find_bad_character(test_string)

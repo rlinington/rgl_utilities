@@ -49,7 +49,7 @@ def ms2analyte_to_npanalyst(flat_grid_df, analyte_dict):
     print(transposed_grid)
 
     output_path = Path("/Users/roger/Git/rgl_utilities/data/npanalyst/MS2Analyte_flat_files/Garcinia NP analyte_npanalyst_mzmine_input.csv")
-    transposed_grid.to_csv(output_path, index=False)
+    transposed_grid.to_csv(output_path, index=False, line_terminator='\n')
 
 
 def analyte_to_dict(analyte_list):
@@ -69,7 +69,8 @@ def analyte_to_dict(analyte_list):
     return analyte_dict
 
 
-if __name__ == "__main__":
+def create_np_analyst_input():
+    """wrapper for ms2analyte_to_npanalyst function"""
 
     grid_path = Path("/Users/roger/Git/rgl_utilities/data/npanalyst/MS2Analyte_flat_files/Garcinia NP analyte_experiment_analyte_peak_area_grid.csv")
     analyte_path = Path("/Users/roger/Git/rgl_utilities/data/npanalyst/MS2Analyte_flat_files/Garcinia NP analyte_Samples_experiment_analytes.pickle")
@@ -83,3 +84,9 @@ if __name__ == "__main__":
         grid_df = pd.read_csv(g)
 
     ms2analyte_to_npanalyst(grid_df, analyte_dict)
+
+
+if __name__ == "__main__":
+
+    create_np_analyst_input()
+
