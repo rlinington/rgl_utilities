@@ -63,8 +63,6 @@ def table_to_network(table_path: Path, activity_score: float, cluster_score: flo
             npanalyst_graph.add_edge(row[0], sample)
     nx.set_node_attributes(npanalyst_graph, node_attributes)
 
-
-
     output_path = Path(output_dir, f"{table_path.stem}_activity_{activity_score}_cluster_{cluster_score}.graphML")
     nx.write_graphml(npanalyst_graph, str(output_path))
 
