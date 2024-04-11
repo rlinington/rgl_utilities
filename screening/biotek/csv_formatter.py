@@ -82,6 +82,7 @@ def add_percent_inhibition(input_df: pd.DataFrame) -> pd.DataFrame:
     zero"""
     input_df["percent_inhibition"] = 100 - input_df["percent_g"]
     input_df["normalized_percent_inhibition"] = input_df["percent_inhibition"].clip(lower=0)
+    input_df["normalized_percent_inhibition"] = input_df["percent_inhibition"].clip(upper=100)
 
     return input_df
 
@@ -148,13 +149,13 @@ if __name__ == "__main__":
     source_directory = Path("/Users/roger/Documents/Students/Emily_McMann/Carbapenemase_inhibitors/Raw_screening_data")
     output_dir = Path(source_directory, "output")
 
-    # for file in Path(source_directory, "t0").glob("*.xlsx"):
-    #     print(f"Starting file {file}")
-    #     plate_data = plate_reader_to_df(file)
-    #     plate_data = normalize_absorbance_data(plate_data, file)
-    #     plate_data = add_percent_inhibition(plate_data)
-    #     output_path = Path(output_dir, "plate_data", f"{file.stem}_processed.csv")
-    #     plate_data.to_csv(output_path, encoding='UTF-8', lineterminator='\n', index=False)
-    #
-    # add_prefraction_numbers(source_directory)
+    for file in Path(source_directory, "t0").glob("*.xlsx"):
+        print(f"Starting file {file}")
+        plate_data = plate_reader_to_df(file)
+        plate_data = normalize_absorbance_data(plate_data, file)
+        plate_data = add_percent_inhibition(plate_data)
+        output_path = Path(output_dir, "plate_data", f"{file.stem}_processed.csv")
+        plate_data.to_csv(output_path, encoding='UTF-8', lineterminator='\n', index=False)
+
+    add_prefraction_numbers(source_directory)
     create_npanalyst_input(source_directory)
