@@ -70,7 +70,7 @@ def table_to_network(table_path: Path, activity_score: float, cluster_score: flo
 if __name__ == "__main__":
     table_path = Path("/Users/roger/Git/rgl_utilities/data/npanalyst/csv_tables/npanalyst_1ad81e2e-e2cc-4805-a0a3-fea86ad0af2d.csv")
     output_dir_path = Path("/Users/roger/Git/rgl_utilities/data/npanalyst/output")
-    activity_score = 2
+    activity_score = 1
     cluster_score = -0.01
 
     table_to_network(table_path, activity_score, cluster_score, output_dir_path)
