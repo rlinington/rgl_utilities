@@ -41,7 +41,6 @@ def submission_to_curator(submission_dir, title, scan_entries=False):
             input_data = json.load(f)
 
         for deposition in input_data:
-            print(deposition)
             payload = {'doi': deposition["doi"]}
             retry = True
             while retry:
@@ -78,6 +77,7 @@ def submission_to_curator(submission_dir, title, scan_entries=False):
                                    "compounds": []
                                    }
                 for compound in json.loads(deposition["compounds"]):
+                    print(f"Name: {compound['name']}")
                     curate_compound = True
                     if compound["new_compound"] is False:
                         old_curate_response = input(f"Compound {compound['name']} is not new. Curate (y/n)?")
@@ -87,14 +87,14 @@ def submission_to_curator(submission_dir, title, scan_entries=False):
                     retry_compound = True
                     while retry_compound:
                         atlas_r = requests.post(f'https://www.npatlas.org/api/v1/compounds/basicSearch?smiles='
-                                                f'{compound["smiles"]}&method=full&threshold=0&origin_type=all&rank='
+                                                f'{compound["smiles"]}&method=full&threshold=1&origin_type=all&rank='
                                                 f'all&orderby=npaid&ascending=true&skip=0&limit=10')
                         if atlas_r.status_code == 200:
                             retry_compound = False
                             if scan_entries:
                                 pass
                             else:
-                                if len(atlas_r.json()) > 0:
+                                if len(atlas_r.json()) > 0 and atlas_r.json()[0]["npaid"] != "NPA000001":
                                     atlas_json = atlas_r.json()[0]
                                     if atlas_json["original_name"] == compound["name"]:
                                         print(f"MATCH: for compound {compound['name']}")
@@ -111,6 +111,8 @@ def submission_to_curator(submission_dir, title, scan_entries=False):
                                         else:
                                             print("Invalid response. Must be 'y' or 'n'")
                                             sys.exit()
+                                else:
+                                    print("No structure returned from NP Atlas")
                         elif atlas_r.status_code != 200:
                             print(f"Atlas error {atlas_r.status_code} for {deposition['id']} with compound "
                                   f"{compound['smiles']}")
@@ -178,9 +180,8 @@ def submission_csv_to_json(csv_path: Path, curator: str):
     with open(csv_path) as f:
         csv_f = csv.reader(f)
         headers = next(csv_f)
-        print(headers)
         if headers != ['compound', 'doi', 'smiles', 'taxonomy', 'origin_type']:
-            print("WARNING: csv headers not correct. Must be ['compound', 'doi', 'smiles', 'taxonomy']")
+            print("WARNING: csv headers not correct. Must be ['compound', 'doi', 'smiles', 'taxonomy', 'origin_type']")
             sys.exit()
         for row in csv_f:
             # Perform QC on each row and insert if passes QC check
@@ -235,10 +236,10 @@ if __name__ == "__main__":
     # submission_to_curator(depositions_dir, "Depositions up to 20240531", scan_entries=False)
 
     # Convert csv to deposition json
-    csv_path = Path("/Users/roger/Documents/Chemistry/NP_Atlas/Reassignments/20240716/Atlas_to_be_added_1.csv")
+    csv_path = Path("/Users/roger/Documents/Chemistry/NP_Atlas/Reassignments/20240828/Atlas_to_be_added_2_doi_forced.csv")
     submission_csv_to_json(csv_path, "Ella")
     json_dir = Path(csv_path.parent)
-    submission_to_curator(json_dir, "reassignment additions, 20240716", scan_entries=True)
+    submission_to_curator(json_dir, "reassignment additions, 20240828", scan_entries=False)
 
     # Find bad names strings
 

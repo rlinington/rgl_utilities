@@ -146,7 +146,7 @@ def create_npanalyst_input(source_dir: Path):
 
 if __name__ == "__main__":
 
-    source_directory = Path("/Users/roger/Documents/Students/Emily_McMann/Carbapenemase_inhibitors/BEI_DP_rescreening_data")
+    source_directory = Path("/Users/roger/Documents/Students/Emily_McMann/Carbapenemase_inhibitors/HPLC_subfractions_screen/Screening data")
     output_dir = Path(source_directory, "output")
 
     for file in Path(source_directory, "t0").glob("*.xlsx"):
