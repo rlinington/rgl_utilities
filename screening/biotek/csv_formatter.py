@@ -35,14 +35,21 @@ def plate_reader_to_df(file_path: Path) -> pd.DataFrame:
 
     input_df = pd.read_excel(file_path)
     plate_info = file_path.stem.split("_")
-    plate_number = plate_info[0]
-    strain = plate_info[1]
+    # For Emily's screening data
+    # plate_number = plate_info[0]
+    # strain = plate_info[1]
+
+    # For Hannah's BioMAP data
+    plate_number = int(plate_info[4])
+    plate_source = plate_info[1] + "_" + plate_info[2]
+    strain = plate_info[0]
 
     plate_data = extract_raw_values(input_df, "t0")
+    plate_data["plate_source"] = plate_source
     plate_data["plate_number"] = plate_number
     plate_data["strain"] = strain
 
-    plate_data = plate_data[["strain", "plate_number", "well", "t0_value"]]
+    plate_data = plate_data[["strain", "plate_source", "plate_number", "well", "t0_value"]]
 
     t20_path = Path(file_path.parents[1], "t20", file_path.name)
     t20_df = pd.read_excel(t20_path)
@@ -58,13 +65,23 @@ def normalize_absorbance_data(input_df: pd.DataFrame, filepath: Path) -> pd.Data
     """Normalize plate data based on positive and negative control values"""
 
     raw_df = pd.read_excel(filepath)
-    t0_positive_control_values = [x for xs in raw_df.iloc[26:34, 24:26].values.tolist() for x in xs]
-    t0_negative_control_values = [x for xs in raw_df.iloc[34:, 24:26].values.tolist() for x in xs]
+    # For Emily's data
+    # t0_positive_control_values = [x for xs in raw_df.iloc[26:34, 24:26].values.tolist() for x in xs]
+    # t0_negative_control_values = [x for xs in raw_df.iloc[34:, 24:26].values.tolist() for x in xs]
+
+    # For Hannah's BioMAP data
+    t0_positive_control_values = [x for xs in raw_df.iloc[26:44, 2:3].values.tolist() for x in xs]
+    t0_negative_control_values = [x for xs in raw_df.iloc[26:44, 3:4].values.tolist() for x in xs]
 
     t20_path = Path(filepath.parents[1], "t20", filepath.name)
     t20_df = pd.read_excel(t20_path)
-    t20_positive_control_values = [x for xs in t20_df.iloc[26:34, 24:26].values.tolist() for x in xs]
-    t20_negative_control_values = [x for xs in t20_df.iloc[34:, 24:26].values.tolist() for x in xs]
+    # For Emily's data
+    # t20_positive_control_values = [x for xs in t20_df.iloc[26:34, 24:26].values.tolist() for x in xs]
+    # t20_negative_control_values = [x for xs in t20_df.iloc[34:, 24:26].values.tolist() for x in xs]
+
+    # For Hannah's BioMAP data
+    t20_positive_control_values = [x for xs in t20_df.iloc[26:44, 2:3].values.tolist() for x in xs]
+    t20_negative_control_values = [x for xs in t20_df.iloc[26:44, 3:4].values.tolist() for x in xs]
 
     normalized_positive_control = np.array(t20_positive_control_values) - np.array(t0_positive_control_values)
     normalized_negative_control = np.array(t20_negative_control_values) - np.array(t0_negative_control_values)
@@ -104,13 +121,31 @@ def add_prefraction_numbers(source_dir):
 
     for output_file in Path(source_dir, "output", "plate_data").glob("*.csv"):
         results_df = pd.read_csv(output_file)
-        plate_number = int(results_df["plate_number"].unique().tolist()[0][2:])
+        # For Emily's screening data
+        # plate_number = int(results_df["plate_number"].unique().tolist()[0][2:])
+        # For Hannah's BioMAP data
+        plate_number = results_df["plate_number"].unique().tolist()[0]
         output_df = pd.merge(results_df, platemap_dict[plate_number][["Well", "Prefraction"]],
                              left_on="well",
                              right_on="Well")
         output_df.rename(columns={'Prefraction':'prefraction'}, inplace=True)
+        # For Emily's data
+        # output_df = output_df[["strain",
+        #                        "plate_number",
+        #                        "well",
+        #                        "prefraction",
+        #                        "t0_value",
+        #                        "t20_value",
+        #                        "difference",
+        #                        "percent_g",
+        #                        "percent_inhibition",
+        #                        "normalized_percent_inhibition"]]
+        # For Hannah's BioMAP data
+
+        # rename B column as DMSO + bacterial strain
+        output_df.loc[output_df.well.str[1:] == "02", "prefraction"] = "DMSO + test strain"
         output_df = output_df[["strain",
-                               "plate_number",
+                               "plate_source",
                                "well",
                                "prefraction",
                                "t0_value",
@@ -120,7 +155,7 @@ def add_prefraction_numbers(source_dir):
                                "percent_inhibition",
                                "normalized_percent_inhibition"]]
         output_df = output_df.round(3)
-        output_df.to_csv(output_file)
+        output_df.to_csv(output_file, encoding='UTF-8', lineterminator='\n', index=False)
 
 
 def create_npanalyst_input(source_dir: Path):
@@ -132,21 +167,22 @@ def create_npanalyst_input(source_dir: Path):
         df_list.append(results_df)
 
     full_data_df = pd.concat(df_list, ignore_index=True)
+    full_data_df["plate_source_compound"] = full_data_df["plate_source"] + "_" + full_data_df["prefraction"]
     filtered_df = full_data_df[full_data_df["prefraction"].notna()]
     npanalyst_df = pd.pivot_table(filtered_df,
                                   values="normalized_percent_inhibition",
-                                  index=["prefraction"],
+                                  index=["plate_source_compound"],
                                   columns=["strain"],
                                   aggfunc="sum")
     npanalyst_df.index.name = None
     npanalyst_df.rename(columns={"strain": "prefraction"}, inplace=True)
     output_path = Path(source_dir, "output", "npanalyst_bioassay_data.csv")
-    npanalyst_df.to_csv(output_path)
+    npanalyst_df.to_csv(output_path, encoding='UTF-8', lineterminator='\n')
 
 
 if __name__ == "__main__":
 
-    source_directory = Path("/Users/roger/Documents/Students/Emily_McMann/Carbapenemase_inhibitors/HPLC_subfractions_screen/Screening data")
+    source_directory = Path("/Users/roger/Documents/Students/Hannah_Cavanagh/BioMAP_2024")
     output_dir = Path(source_directory, "output")
 
     for file in Path(source_directory, "t0").glob("*.xlsx"):
